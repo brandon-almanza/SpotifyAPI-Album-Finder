@@ -1,4 +1,5 @@
 import "./App.css";
+import SpotifyIcon from "./assets/Spotify_icon.png";
 import {
   FormControl,
   InputGroup,
@@ -72,7 +73,7 @@ function App() {
   return (
     <>
     <main>
-      <img src="/src/assets/Spotify_icon.png" alt="Spotify Icon" width={100} height={100} />
+      <img src={SpotifyIcon} alt="Spotify Icon" width={100} height={100} />
       <h1 style={{backgroundImage: "linear-gradient(to right, #1DB954, #FFFFFF)", WebkitBackgroundClip: "text", color: "transparent"}}>Spotify Album Finder</h1>
     </main>
 
