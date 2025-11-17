@@ -10,8 +10,8 @@ import {
 } from "react-bootstrap";
 import { useState, useEffect } from "react";
 
+// Keep `VITE_CLIENT_ID` if needed frontend-side (PKCE/other flows).
 const clientId = import.meta.env.VITE_CLIENT_ID;
-const clientSecret = import.meta.env.VITE_CLIENT_SECRET;
 
 function App() {
   const [searchInput, setSearchInput] = useState("");
@@ -19,55 +19,69 @@ function App() {
   const [albums, setAlbums] = useState([]);
 
   useEffect(() => {
-    let authParams = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body:
-        "grant_type=client_credentials&client_id=" +
-        clientId +
-        "&client_secret=" +
-        clientSecret,
-    };
+    // Request token from serverless endpoint to keep client_secret private.
+    async function fetchToken() {
+      try {
+        const res = await fetch('/api/token', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) {
+          console.error('Token fetch failed', res.status, data);
+          return;
+        }
+        if (data.access_token) setAccessToken(data.access_token);
+        else console.error('No access_token in token response', data);
+      } catch (err) {
+        console.error('Token fetch error', err);
+      }
+    }
 
-    fetch("https://accounts.spotify.com/api/token", authParams)
-      .then((result) => result.json())
-      .then((data) => {
-        setAccessToken(data.access_token);
-      });
+    fetchToken();
   }, []);
 
   async function search() {
-    let artistParams = {
-      method: "GET",
+    if (!accessToken) {
+      console.error('No access token - cannot search');
+      return;
+    }
+
+    const artistParams = {
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + accessToken,
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + accessToken,
       },
     };
 
-    // Get Artist
-    const artistID = await fetch(
-      "https://api.spotify.com/v1/search?q=" + searchInput + "&type=artist",
-      artistParams
-    )
-      .then((result) => result.json())
-      .then((data) => {
-        return data.artists.items[0].id;
-      });
+    try {
+      const artistRes = await fetch(
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(searchInput)}&type=artist`,
+        artistParams
+      );
+      const artistData = await artistRes.json();
+      if (!artistRes.ok) {
+        console.error('Artist search failed', artistRes.status, artistData);
+        return;
+      }
 
-    // Get Artist Albums
-    await fetch(
-      "https://api.spotify.com/v1/artists/" +
-        artistID +
-        "/albums?include_groups=album&market=US&limit=50",
-      artistParams
-    )
-      .then((result) => result.json())
-      .then((data) => {
-        setAlbums(data.items);
-      });
+      const artistID = artistData?.artists?.items?.[0]?.id;
+      if (!artistID) {
+        console.error('No artist found for', searchInput, artistData);
+        return;
+      }
+
+      const albumsRes = await fetch(
+        `https://api.spotify.com/v1/artists/${artistID}/albums?include_groups=album&market=US&limit=50`,
+        artistParams
+      );
+      const albumsData = await albumsRes.json();
+      if (!albumsRes.ok) {
+        console.error('Albums fetch failed', albumsRes.status, albumsData);
+        return;
+      }
+      setAlbums(albumsData.items || []);
+    } catch (err) {
+      console.error('Search error', err);
+    }
   }
 
   return (
