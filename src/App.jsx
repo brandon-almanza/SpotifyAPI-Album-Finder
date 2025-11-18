@@ -72,9 +72,9 @@ function App() {
 
   return (
     <>
-    <main>
-      <img src={SpotifyIcon} alt="Spotify Icon" width={100} height={100} />
-      <h1 style={{backgroundImage: "linear-gradient(to right, #1DB954, #FFFFFF)", WebkitBackgroundClip: "text", color: "transparent"}}>Spotify Album Finder</h1>
+    <main className="app-main">
+      <img src={SpotifyIcon} alt="Spotify Icon" width={120} height={120} />
+      <h1 className="title">Spotify Album Finder</h1>
     </main>
 
       <Container>
@@ -89,81 +89,28 @@ function App() {
               }
             }}
             onChange={(event) => setSearchInput(event.target.value)}
-            style={{
-              width: "300px",
-              height: "35px",
-              borderWidth: "0px",
-              borderStyle: "solid",
-              borderRadius: "5px",
-              marginRight: "10px",
-              paddingLeft: "10px",
-            }}
+            className="search-input"
           />
           <Button onClick={search}>Search</Button>
         </InputGroup>
       </Container>
 
       <Container>
-        <Row
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "wrap",
-            justifyContent: "space-around",
-            alignContent: "center",
-          }}
-        >
+        <Row className="albums-row">
           {albums.map((album) => {
             return (
-              <Card
-                key={album.id}
-                style={{
-                  backgroundColor: "white",
-                  margin: "10px",
-                  borderRadius: "5px",
-                  marginBottom: "30px",
-                }}
-              >
-                <Card.Img
-                  width={200}
-                  src={album.images[0].url}
-                  style={{
-                    borderRadius: "4%",
-                  }}
-                />
+              <Card key={album.id} className="album-card">
+                <Card.Img width={200} src={album.images[0].url} className="album-img" />
                 <Card.Body>
-                  <Card.Title
-                    style={{
-                      whiteSpace: "wrap",
-                      fontWeight: "bold",
-                      maxWidth: "200px",
-                      fontSize: "18px",
-                      marginTop: "10px",
-                      color: "black",
-                    }}
-                  >
+                  <Card.Title className="album-title">
                     {album.name}
                   </Card.Title>
-                  <Card.Text
-                    style={{
-                      color: "black",
-                    }}
-                  >
+                  <Card.Text className="album-text">
                     Release Date: <br /> {album.release_date}
                   </Card.Text>
-                  <Button
-                    href={album.external_urls.spotify}
-                    style={{
-                      backgroundColor: "black",
-                      color: "white",
-                      fontWeight: "bold",
-                      fontSize: "15px",
-                      borderRadius: "5px",
-                      padding: "10px",
-                    }}
-                  >
-                    Album Link
-                  </Button>
+                    <Button href={album.external_urls.spotify} className="album-link">
+                      Album Link
+                    </Button>
                 </Card.Body>
               </Card>
             );
@@ -172,7 +119,7 @@ function App() {
       </Container>
 
       <footer>
-        <p style={{ textAlign: "center", color: "gray" }}>&copy; 2025 Brandon Argenal Almanza</p>
+        <p className="footer-text">&copy; 2025 Brandon Argenal Almanza</p>
       </footer>
     </>
   );
